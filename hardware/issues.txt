@@ -1,0 +1,7 @@
+There are two mistakes in the daughter board layout
+
+1. The A0-A7 electronic brick connectors were connected in the wrong order, A7-A0
+2. The PCB decal for the 18650 battery is actually an AA size decal so the battery must be connected J20 or J21 instead.
+
+A future redesign will need to take into account the potential wind-down of 2G GSM and allow for alternatives.
+The flash and RAM of the ATMEGA328 are both utilised to 80% so a future version should probably migrate to an arduino zero compatible board based on the SAMD21 MCU
