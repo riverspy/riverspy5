@@ -1,0 +1,3 @@
+v5.01 05/09/2019 17:10 
+1. While reading the LIDAR, the system now reads continuously rather than once every second. -1 readings are ignored.  
+2. Stability problems were arising from the lack of free memory. To free up resources, configuration by SMS has been commented out
