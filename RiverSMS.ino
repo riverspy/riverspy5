@@ -1,3 +1,4 @@
+/*
 int NewSMScmd()
 {
 	int SMSno;
@@ -29,7 +30,7 @@ int CheckForSMS()
 	for (SMSindex=(MSG_LEN-1); SMSindex>=0; SMSindex--)
 		msg[SMSindex] = 0; */
 
-	lcd.setCursor(0,5);
+/*	lcd.setCursor(0,5);
 	lcd.clearLine();
 	lcd.print(F("Check SMS "));
 	emptyRXbuffer();
@@ -260,7 +261,7 @@ void DelSMS(int Sindex)
 	else
 	lcd.print(F("->bad"));
 	delay(500);
-}
+} */
 
 void SendSMS(char* Num, char* SMSmsg)
 {

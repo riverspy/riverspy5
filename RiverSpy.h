@@ -15,12 +15,12 @@
 #define GSM_ON 6
 #define GSM_RESET 7
 
-#define MSG_LEN 120
+#define MSG_LEN 130
 #define MAX_CMD_LEN 25
 #define SERIAL_BAUD 19200
 #define SERIAL_TIMEOUT 2500
 #define LEVELARRAY 96					// store up to 96 readings between web updates, equivalent of 24 hours at 15min intervals
-#define LOW_POWER_mV 3900				// go into low power mode, updating every 3 hours if voltage is below 3.900V
+#define LOW_POWER_mV 3800				// go into low power mode, updating every 3 hours if voltage is below 3.900V
 
 #define UPDATE_URL "http://www.riverspy.net/updaterz.cgi"
 //updaterz.cgi will send on the data to riverzone.eu
@@ -39,7 +39,7 @@
 #define Default_Trigger		100			// Send web updates every reading when the level is above trigger (default 100cm)
 #define Default_Alert		2000		// this will alert up to 10 VIPs by SMS when the river exceeds this level
 #define Default_UpInt		12			// send updates to web every nth reading unless river level above trigger
-#define Default_DebugLevel	1			// 0001 => just the startup admin sms 
+#define Default_DebugLevel	0			// 0001 => just the startup admin sms 
 #define DebugBit_SMS		0			// Bit 0 => send Admin SMS at boot time
 #define DebugBit_CP			1			// Bit 1 => track checkpoint in EEPROM - caution EEPROM can burn out after 100,000 writes
 #define DebugBit_24hrON		2			// Bit 2 => leave the phone on - only use if powered from mains
@@ -125,4 +125,4 @@
 #define CP_DELETE_SMS	1300
 #define CP_HANDLE_SMS	1400
 #define CP_CONFIG_REBOOT	1500
-
+#define CP_READING_LEVEL	1600

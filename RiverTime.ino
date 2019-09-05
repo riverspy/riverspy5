@@ -14,6 +14,8 @@ ISR(WDT_vect)	// Watchdog Interrupt Service. This is executed when watchdog time
   }
 }
 
+
+
 void Reboot(void)
 {
 	lcd.clear();
@@ -22,7 +24,7 @@ void Reboot(void)
 	lcd.setCursor(0,2);
 	lcd.print(F("Reboot now..."));
 	delay(2000);
-	wdt_enable(WDTO_1S);			// reboot if inactive for 1 seconds	
+	wdt_setup_1s_with_reset();
 	delay(2000);					// this won't have time to finish
 	lcd.print(F("still here :("));
 }

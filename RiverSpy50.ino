@@ -12,21 +12,22 @@
 #include <SoftwareSerial.h>
 
 
-int mV=12000, PassCode, Temperature, ret;
+int mV=12000, PassCode, Temperature, ret, validReads;
 char n,v;
 int Levels[LEVELARRAY];
 char LatestUpdateSlot, Slot, StartMonth;
 int Heartbeat, GaugeID, TriggerLevel, AlertLevel, UpdateInterval;
 boolean LeavePhoneOn, AlertActive;
 int Offset, Readings, Scale1000;
-int Total, dist, strength;
+int dist, strength;
 int TicksToGo, DebugLevel;
 
 char msg[MSG_LEN+1], Ch;
-char Sender[VIPlength], SMScmd[20], OKstr[5]="OK\r\n", ERRstr[6]="ERROR", CRLF[3]="\r\n";
+// char Sender[VIPlength];
+char SMScmd[20], OKstr[5]="OK\r\n", ERRstr[6]="ERROR", CRLF[3]="\r\n";
 boolean CmdWaiting, ReTry;
 volatile int f_wdt;	// watchdog timer flag
-long nextSlot, turnOnDelay;
+long nextSlot, turnOnDelay, readingStart, Total;
 float ScaleFactor, timeFactor;
 
 uint8_t PhoneOK=0, GprsOn=0, TCPopen=0;
@@ -45,7 +46,7 @@ void setup(){
 		
 	lcd.begin(84, 48, CHIP_ST7576);
 	lcd.print(F("-RIVERSPY.NET-"));
-	lcd.print(F("    v5.0x     "));
+	lcd.print(F("    v5.01     "));
 	lcd.print(F("     by       "));
 	lcd.print(F(" Daithi Power "));
 	lcd.print(F("   Aug. 2019  "));
@@ -95,7 +96,7 @@ void setup(){
 		Offset = eeprom_read_word((uint16_t*)E_OFFSET);
 		Readings = eeprom_read_word((uint16_t*)E_READS);
 		Scale1000 = eeprom_read_word((uint16_t*)E_SCALE1000);
-		ScaleFactor = 1.0 * Scale1000 / (Readings * 1000.0);
+		ScaleFactor = 1.0 * Scale1000 / 1000.0;
 		TriggerLevel = eeprom_read_word((uint16_t*)E_TRIGGERLEVEL);		
 		AlertLevel = eeprom_read_word((uint16_t*)E_ALERTLEVEL);
 		UpdateInterval = eeprom_read_word((uint16_t*)E_UPINT);
@@ -149,7 +150,7 @@ void setup(){
 	mySerial.begin(TFMINI_BAUDRATE);
 	// Initialize the TF Mini sensor
 	tfmini.begin(&mySerial);
-	  
+	
 	lcd.clear();
 	lcd.print(F("-RIVERSPY.NET-"));
 	lcd.setCursor(0,2);
@@ -190,7 +191,7 @@ void setup(){
 			lcd.print(Offset);
 			lcd.print(" ");
 			lcd.setCursor(48,5);
-			lcd.print(Offset - int(dist * Readings * ScaleFactor));
+			lcd.print(Offset - int(dist * ScaleFactor));
 			lcd.print(" ");
 
 			// Wait some short time before taking the next measurement
@@ -314,22 +315,23 @@ void setup(){
 		SendSMS(AdminPhone,msg);
 	}
 	
-	LeavePhoneOn = true;		// stay powered up for the first cycle
+//	LeavePhoneOn = true;		// stay powered up for the first cycle
 	CmdWaiting = false;			// no SMS commands to process yet
 	wdt_reset();
-	if (PhoneOK)
-		NewSMScmd();
+/*	if (PhoneOK)
+		NewSMScmd(); */
 				
 	GetRealTime(GaugeID);				// read the time from the SIM900	
 	StartMonth = month();
+	PhoneOff();
 	
 	Slot = SetSlot();	
-	LatestUpdateSlot = Slot-6;			// send the last 6 readings on the first update
+	LatestUpdateSlot = Slot-2;			// send the last 2 readings on the first update
 	if (LatestUpdateSlot<0) LatestUpdateSlot = LatestUpdateSlot + LEVELARRAY;
 	lcd.setCursor(0,0);
 	lcd.print(F("Slot:"));
 	lcd.print((int)Slot);
-	Levels[Slot] = Offset - int(dist * Readings * ScaleFactor);		// scale to vertical cm and subtract from height of gauge above datum
+	Levels[Slot] = Offset - int(dist * ScaleFactor);		// scale to vertical cm and subtract from height of gauge above datum
 //	Levels[Slot] = freeRAM();								// useful for debugging
 
 	wdt_reset(); 
@@ -346,6 +348,7 @@ void loop()
 		
 	Total = 0;
 	wdt_setup_1s();								// configure the watchdog timer for 1s sleep followed by wake to interrupt	
+	f_wdt=0;
 	TrackCP(CP_1S_LOOP);
 	digitalWrite(SENSOR_ON,LOW);
 	
@@ -359,32 +362,6 @@ void loop()
 			adjustTime(1);	// add a second to the clock
 			UpdateScreenTime();	
 															
-			if (TicksToGo == Readings+1)
-			{
-//				ADCSRA = ADCSRA | bit (ADEN);		// enable ADC				
-				digitalWrite(SENSOR_ON, HIGH);		// turn on the 5V supply to the underwater/LIDAR sensorr
-				pinMode(A3,OUTPUT);	// enable the softserial TX line
-				while (mySerial.available()>0)
-				{
-					Ch = mySerial.read();
-				}
-				lcd.setCursor(0,4);
-				lcd.clearLine();
-				lcd.print(F(" reading level"));
-			}
-			else if (TicksToGo <= Readings)
-			{
-				n = (84-5) * (Readings-TicksToGo) / Readings;	// screen is 84 pixels, a character is 5 pixels				
-				lcd.setCursor(n,4);
-				lcd.print('+');
-				dist = tfmini.getDistance();
-				Total = Total + dist;
-				lcd.setCursor(0,3);
-				lcd.clearLine();
-				lcd.print("Dist ");
-				lcd.print(dist);
-				lcd.print("cm");
-			}
 			/* Don't forget to clear the flag. */
 			f_wdt = 0;		
 			TicksToGo--;  
@@ -394,16 +371,56 @@ void loop()
 			/* Do nothing. */
 		}
 	}
+	turnOnDelay = now();				// we need to know the time difference between wake-up and setting the clock later
+	wdt_setup_8s_with_reset();	// a wdt timeout now would cause a reboot
+	
+	//				ADCSRA = ADCSRA | bit (ADEN);		// enable ADC
+	digitalWrite(SENSOR_ON, HIGH);		// turn on the 5V supply to the underwater/LIDAR sensorr
+	pinMode(A3,OUTPUT);	// enable the softserial TX line
+	tfmini.begin(&mySerial);
+	delay(100);	
+	
+	while (mySerial.available()>0)
+	{
+		Ch = mySerial.read();	// clear the serial port buffer
+	}
+	lcd.setCursor(0,4);
+	lcd.clearLine();
+	lcd.print(F(" reading level"));
+	lcd.setCursor(0,5);
+	
+	readingStart = now();
+	Total = 0;		// accumulator total of valid reading values
+	validReads = 0;			// number of valid readings
+	TrackCP(CP_READING_LEVEL);
+	
+	while((now()-readingStart) < Readings)// keep reading continuously for Readings seconds
+	{
+		dist = tfmini.getDistance();	
+		if (dist>0)							// ignore any returns of -1
+		{
+			Total = Total + dist;
+			validReads++;
+			lcd.clearLine();
+			lcd.print(validReads);
+			lcd.print(F("  "));		// update the last line of the display with the number of valid readings and the current reading
+			lcd.print(dist);
+			delay(50);
+		}	
+		wdt_reset();	
+	}
+	if (validReads != 0) 
+		Total = Total / validReads;		// use the average value of the readings
+
 	digitalWrite(SENSOR_ON, LOW);			// turn off the 5V supply to the underwater/LIDAR sensor
 	pinMode(A3,INPUT);	// make sure no power is being drawn by the LIDAR through the serial TX
-
-
 	wdt_enable(WDTO_8S);			// reboot if inactive for 8 seconds	
 	TrackCP(CP_SET_TO_8S);
-	turnOnDelay = now();				// we need to know the time difference between wake-up and setting the clock later
+	lcd.print(F("cm"));
+	delay(1000);		// allow user to read the screen at the end of the read phase
 
 	Slot = SetSlot();				// set the time for the next slot and update the variable Slot	
-	Levels[Slot] = (int)(Offset - ScaleFactor * Total);		// scale to cm and add any offset due to sensor being above the 0cm level of the river	
+	Levels[Slot] = Offset - (int)(ScaleFactor * Total);		// scale to cm and add any offset due to sensor being above the 0cm level of the river	
 
 	if (LatestUpdateSlot == Slot)			// check if the circular buffer is full
 		LatestUpdateSlot++;
@@ -459,18 +476,18 @@ void loop()
 				delay(5000);
 				wdt_reset();
 				TrackCP(CP_PIN_IS_GOOD);
-				LeavePhoneOn = (NewSMScmd() != -1);		// if we get an sms cmd, process it and then leave the modem on for the next cycle
+/*				LeavePhoneOn = (NewSMScmd() != -1);		// if we get an sms cmd, process it and then leave the modem on for the next cycle
 														// -1 implies that there was no SMS command waiting to be processed
 				if (Slot%48 == 0)		// leave it on for a slot every 12 hours to make sure that texts get through
 					LeavePhoneOn = true;
 					
 				wdt_reset();
-				delay(1000);
+				delay(1000); */
 				TrackCP(CP_SEND_UPDATE);
 				ReTry = SendLevelUpdate();
 				delay(500);
 			
-				if (Levels[Slot] < (AlertLevel-5))
+/*				if (Levels[Slot] < (AlertLevel-5))
 				AlertActive = true;			// reset the TriggerActive flag once the river drops
 				if (Levels[Slot] >= AlertLevel && AlertActive)
 				{
@@ -484,7 +501,7 @@ void loop()
 						if (Sender[0] != 0)			// it contains a phone number
 							SendSMS(Sender, msg);
 					}
-				}	
+				}	*/
 			};
 			if ((mV<LOW_POWER_mV) && (UpdateInterval<12) && !bitRead(DebugLevel, DebugBit_24hrON))
 			{
@@ -568,7 +585,7 @@ void SetDefaults()
 	eeprom_write_word((uint16_t*)E_READS, Readings);
 	GaugeID = Default_GaugeID;
 	eeprom_write_word((uint16_t*)E_GAUGE_ID, GaugeID);
-	ScaleFactor = 1.0 * Default_Scale / (Readings * 1000.0);
+	ScaleFactor = 1.0 * Default_Scale / 1000.0;
 	eeprom_write_word((uint16_t*)E_SCALE1000, Default_Scale);
 	Scale1000 = Default_Scale;
 	TriggerLevel = Default_Trigger;
@@ -663,8 +680,9 @@ int SendLevelUpdate()
 				lcd.print((int)(TrySlot));
 				lcd.print('>');
 					
-				sprintf(msg,"%s?river=%05d&pass=%04d&time=%ld&level=%d&mvolts=%d&temp=%d&trend=%d", UPDATE_URL, GaugeID, PassCode, SlotTime, Levels[TrySlot], mV, Temperature, (Levels[TrySlot]-LastLevel(TrySlot)));
+				sprintf(msg,"%s?river=%05d&pass=%04d&time=%ld&level=%d&mvolts=%d&temp=%d&vr=%d", UPDATE_URL, GaugeID, PassCode, SlotTime, Levels[TrySlot], mV, Temperature, validReads);
 				ret = getHTTPbody(msg, UPDATE_SERVER, msg, 50, 3);		// 4 characters should be enough to hold level but read em all
+				wdt_reset();
 				
 				lcd.print(ret);
 				lcd.print(':');
@@ -699,6 +717,7 @@ int SendLevelUpdate()
 					closeTCP();
 					TCPopen=0;
 					Tries--;
+					wdt_reset();
 				}
 			}
 			else
@@ -769,13 +788,13 @@ int freeRAM()
 	return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 
-void ReadVIP(char index, char* vip)
+/* void ReadVIP(char index, char* vip)
 {
 	char digit;
 	for (digit=0; digit<VIPlength; digit++)
 			vip[digit] = eeprom_read_byte((uint8_t*)(E_VIPS + index*VIPlength + digit));
 	vip[VIPlength-1] = 0;	
-}
+} */
 
 boolean UpPress()
 {
