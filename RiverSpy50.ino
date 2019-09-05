@@ -419,9 +419,12 @@ void loop()
 	lcd.print(F("cm"));
 	delay(1000);		// allow user to read the screen at the end of the read phase
 
-	Slot = SetSlot();				// set the time for the next slot and update the variable Slot	
-	Levels[Slot] = Offset - (int)(ScaleFactor * Total);		// scale to cm and add any offset due to sensor being above the 0cm level of the river	
-
+	Slot = SetSlot();				//
+	if (validReads != 0) set the time for the next slot and update the variable Slot	
+		Levels[Slot] = Offset - (int)(ScaleFactor * Total);		// scale to cm and add any offset due to sensor being above the 0cm level of the river	
+	else
+		Levels[Slot] = 0;
+	
 	if (LatestUpdateSlot == Slot)			// check if the circular buffer is full
 		LatestUpdateSlot++;
 	if (LatestUpdateSlot == LEVELARRAY)
