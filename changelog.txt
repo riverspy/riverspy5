@@ -1,3 +1,6 @@
 v5.01 05/09/2019 17:10 
 1. While reading the LIDAR, the system now reads continuously rather than once every second. -1 readings are ignored.  
 2. Stability problems were arising from the lack of free memory. To free up resources, configuration by SMS has been commented out
+
+v5.02 06/09/2019 20:57
+1. Added code to log the min, mean and max distances measured by the LIDAR and upload to the log file on the server
