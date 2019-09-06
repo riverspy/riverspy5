@@ -23,6 +23,7 @@
 #define LOW_POWER_mV 3800				// go into low power mode, updating every 3 hours if voltage is below 3.900V
 
 #define UPDATE_URL "http://www.riverspy.net/updaterz.cgi"
+#define DEBUGLOG_URL "http://www.riverspy.net/debuglog.cgi"
 //updaterz.cgi will send on the data to riverzone.eu
 #define UPDATE_SERVER "www.riverspy.net"
 #define TIME_URL "http://www.riverspy.net/time.cgi"
@@ -30,15 +31,15 @@
 
 #define SIM_PIN				"0000"		// PIN code of the GSM SIM card
 #define Default_Contrast	60			// was 127
-#define Default_Heartbeat	900			// default is 900 seconds = 15 minutes
+#define Default_Heartbeat	300			// default is 900 seconds = 15 minutes
 #define Default_Readings	10
-#define Default_Offset		600			// River Level = Offset - (Vertical distance measured by LIDAR) (default 600cm)
+#define Default_Offset		400			// River Level = Offset - (Vertical distance measured by LIDAR) (default 600cm)
 #define Default_Scale		1000		// 1000 for vertical LIDAR, 1000.Cos(Theta) if at an angle
 #define Default_GaugeID		10			// 3 for River Styx test setup, 10 for Rein da Medel
 #define Default_Pass		1234		// crude security feature to deter malicious web updates
 #define Default_Trigger		100			// Send web updates every reading when the level is above trigger (default 100cm)
 #define Default_Alert		2000		// this will alert up to 10 VIPs by SMS when the river exceeds this level
-#define Default_UpInt		12			// send updates to web every nth reading unless river level above trigger
+#define Default_UpInt		1			// send updates to web every nth reading unless river level above trigger
 #define Default_DebugLevel	0			// 0001 => just the startup admin sms 
 #define DebugBit_SMS		0			// Bit 0 => send Admin SMS at boot time
 #define DebugBit_CP			1			// Bit 1 => track checkpoint in EEPROM - caution EEPROM can burn out after 100,000 writes
