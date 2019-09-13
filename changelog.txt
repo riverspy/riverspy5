@@ -4,3 +4,8 @@ v5.01 05/09/2019 17:10
 
 v5.02 06/09/2019 20:57
 1. Added code to log the min, mean and max distances measured by the LIDAR and upload to the log file on the server
+
+v5.03 13/09/2019
+1. SMS commands have been reenabled after stability problem was resolved
+2. Debug logging to the server can be enabled/disabled with a flag
+3. Free memory is also included in the logging
