@@ -16,7 +16,7 @@ int mV=12000, PassCode, Temperature, ret, validReads;
 char n,v;
 int Levels[LEVELARRAY];
 char LatestUpdateSlot, Slot, StartMonth;
-int Heartbeat, GaugeID, TriggerLevel, AlertLevel, UpdateInterval;
+int Heartbeat, GaugeID, TriggerLevel, UpdateInterval;
 boolean LeavePhoneOn, AlertActive;
 int Offset, Readings, Scale1000;
 int dist, strength;
@@ -25,7 +25,7 @@ int TicksToGo, DebugLevel;
 
 
 char msg[MSG_LEN+1], Ch;
-// char Sender[VIPlength];
+char Sender[PhoneNoLength];
 char SMScmd[20], OKstr[5]="OK\r\n", ERRstr[6]="ERROR", CRLF[3]="\r\n";
 boolean CmdWaiting, ReTry;
 volatile int f_wdt;	// watchdog timer flag
@@ -48,7 +48,7 @@ void setup(){
 
 	lcd.begin(84, 48, CHIP_ST7576);
 	lcd.print(F("-RIVERSPY.NET-"));
-	lcd.print(F("    v5.02     "));
+	lcd.print(F("    v5.03     "));
 	lcd.print(F("     by       "));
 	lcd.print(F(" Daithi Power "));
 	lcd.print(F("   Sept 2019  "));
@@ -100,7 +100,6 @@ void setup(){
 		Scale1000 = eeprom_read_word((uint16_t*)E_SCALE1000);
 		ScaleFactor = 1.0 * Scale1000 / 1000.0;
 		TriggerLevel = eeprom_read_word((uint16_t*)E_TRIGGERLEVEL);
-		AlertLevel = eeprom_read_word((uint16_t*)E_ALERTLEVEL);
 		UpdateInterval = eeprom_read_word((uint16_t*)E_UPINT);
 		DebugLevel = eeprom_read_word((uint16_t*)E_DEBUGLEVEL);
 	};
@@ -121,32 +120,12 @@ void setup(){
 	lcd.setCursor(0,5);			// show
 	lcd.print(F("Tr:"));
 	lcd.print(TriggerLevel);
-	lcd.print(F(" Al:"));
-	lcd.print(AlertLevel);
 
 	delay(2200);
 	wdt_reset();
 	digitalWrite(GSM_RESET,HIGH);			// cycle the reset pin
 	delay (500);
 	digitalWrite(GSM_RESET,LOW);
-
-	/*   Don't bother with the admin function for now. Its purpose is to send texts to up to 10 numbers if the level exceeds alertlevel
-	n=0;
-	while (n<= NumVIPs-5)
-	{
-		wdt_reset();
-		for (v=0; v<5; v++)
-		{
-			lcd.setCursor(0,v+1);
-			lcd.clearLine();
-			lcd.print(n+v);
-			lcd.print(':');
-			ReadVIP(n+v,Sender);
-			lcd.print(Sender);
-		}
-		n=n+5;
-		delay(2000);
-	}  */
 
 	// Initialize the data rate for the SoftwareSerial port
 	mySerial.begin(TFMINI_BAUDRATE);
@@ -317,15 +296,14 @@ void setup(){
 		SendSMS(AdminPhone,msg);
 	}
 
-//	LeavePhoneOn = true;		// stay powered up for the first cycle
+	LeavePhoneOn = true;		// stay powered up for the first cycle
 	CmdWaiting = false;			// no SMS commands to process yet
 	wdt_reset();
-/*	if (PhoneOK)
-		NewSMScmd(); */
+	if (PhoneOK)
+		NewSMScmd(); 
 
 	GetRealTime(GaugeID);				// read the time from the SIM900
 	StartMonth = month();
-	PhoneOff();
 
 	Slot = SetSlot();
 	LatestUpdateSlot = Slot-2;			// send the last 2 readings on the first update
@@ -334,7 +312,6 @@ void setup(){
 	lcd.print(F("Slot:"));
 	lcd.print((int)Slot);
 	Levels[Slot] = Offset - int(dist * ScaleFactor);		// scale to vertical cm and subtract from height of gauge above datum
-//	Levels[Slot] = freeRAM();								// useful for debugging
 
 	wdt_reset();
 	}
@@ -490,35 +467,20 @@ void loop()
 
 				lcd.print(F("Phone is Ready"));
 				wdt_reset();
-				delay(5000);
+				delay(3000);
 				wdt_reset();
 				TrackCP(CP_PIN_IS_GOOD);
-/*				LeavePhoneOn = (NewSMScmd() != -1);		// if we get an sms cmd, process it and then leave the modem on for the next cycle
+				LeavePhoneOn = (NewSMScmd() != -1);		// if we get an sms cmd, process it and then leave the modem on for the next cycle
 														// -1 implies that there was no SMS command waiting to be processed
 				if (Slot%48 == 0)		// leave it on for a slot every 12 hours to make sure that texts get through
 					LeavePhoneOn = true;
 
 				wdt_reset();
-				delay(1000); */
+				delay(1000); 
 				TrackCP(CP_SEND_UPDATE);
 				ReTry = SendLevelUpdate();
 				delay(500);
 
-/*				if (Levels[Slot] < (AlertLevel-5))
-				AlertActive = true;			// reset the TriggerActive flag once the river drops
-				if (Levels[Slot] >= AlertLevel && AlertActive)
-				{
-					AlertActive = false;
-					sprintf(msg, "Gauge %d is %dcm, up %dcm in %dmin", GaugeID, Levels[Slot], (Levels[Slot]-LastLevel(Slot)),Heartbeat/60);
-					for (v=0; v<NumVIPs; v++)
-					{
-						TrackCP(CP_SEND_TO_VIP + v);
-						wdt_reset();
-						ReadVIP(v,Sender);
-						if (Sender[0] != 0)			// it contains a phone number
-							SendSMS(Sender, msg);
-					}
-				}	*/
 			};
 			if ((mV<LOW_POWER_mV) && (UpdateInterval<12) && !bitRead(DebugLevel, DebugBit_24hrON))
 			{
@@ -607,15 +569,8 @@ void SetDefaults()
 	Scale1000 = Default_Scale;
 	TriggerLevel = Default_Trigger;
 	eeprom_write_word((uint16_t*)E_TRIGGERLEVEL, TriggerLevel);
-	AlertLevel = Default_Alert;
-	eeprom_write_word((uint16_t*)E_ALERTLEVEL, AlertLevel);
 	UpdateInterval = Default_UpInt;
 	eeprom_write_word((uint16_t*)E_UPINT, UpdateInterval);
-	for (v=0; v<NumVIPs; v++)
-		for (n=0; n<VIPlength; n++)												// zero all of the VIP phone numbers
-			eeprom_write_byte((uint8_t*)(E_VIPS + v*VIPlength + n), 0);
-
-	eeprom_write_block( "0863075017", (uint8_t*)(E_VIPS), 11);
 	eeprom_write_word((uint16_t*)E_DEBUGLEVEL, Default_DebugLevel);
 	DebugLevel = Default_DebugLevel;
 	eeprom_write_word((uint16_t*)E_CHECKPOINT, CP_OFF);
@@ -732,9 +687,12 @@ int SendLevelUpdate()
 					{
 						// send extra debug info here
 						wdt_reset();
-						sprintf(msg,"%s?river=%05d&time=%ld&min=%d&mean=%d&max=%d", DEBUGLOG_URL, GaugeID, SlotTime, minDist, meanDist, maxDist);
-						ret = getHTTPbody(msg, UPDATE_SERVER, msg, 50, 3);		// 4 characters should be enough to hold level but read em all
-						wdt_reset();
+						if (bitRead(DebugLevel, DebugBit_log))
+						{
+							sprintf(msg,"%s?river=%05d&time=%ld&min=%d&mean=%d&max=%d&mem=%d", DEBUGLOG_URL, GaugeID, SlotTime, minDist, meanDist, maxDist,freeRAM());
+							ret = getHTTPbody(msg, UPDATE_SERVER, msg, 50, 3);		// 4 characters should be enough to hold level but read em all
+							wdt_reset();
+						}
 					}
 				}
 				else
@@ -813,13 +771,6 @@ int freeRAM()
 	return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 
-/* void ReadVIP(char index, char* vip)
-{
-	char digit;
-	for (digit=0; digit<VIPlength; digit++)
-			vip[digit] = eeprom_read_byte((uint8_t*)(E_VIPS + index*VIPlength + digit));
-	vip[VIPlength-1] = 0;
-} */
 
 boolean UpPress()
 {

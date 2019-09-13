@@ -1,4 +1,4 @@
-/*
+
 int NewSMScmd()
 {
 	int SMSno;
@@ -30,7 +30,7 @@ int CheckForSMS()
 	for (SMSindex=(MSG_LEN-1); SMSindex>=0; SMSindex--)
 		msg[SMSindex] = 0; */
 
-/*	lcd.setCursor(0,5);
+	lcd.setCursor(0,5);
 	lcd.clearLine();
 	lcd.print(F("Check SMS "));
 	emptyRXbuffer();
@@ -186,20 +186,11 @@ void HandleSMScmd()
 			lcd.print(msg);
 			SendSMS(Sender,msg);
 		}
-		
-		else if (SMScmd[5] =='A' || SMScmd[5] == 'a')
-		{
-			AlertLevel = atoi(argPtr);
-			eeprom_write_word((uint16_t*)E_ALERTLEVEL, AlertLevel);
-			sprintf(msg,"Alert %d",AlertLevel);
-			lcd.print(msg);
-			SendSMS(Sender,msg);
-			AlertActive = true;
-		}
+
 		
 		else if (SMScmd[5] =='L' || SMScmd[5] == 'l')
 		{
-			sprintf(msg,"G:%d, L:%d, O:%d, R:%d, F:%d, T:%d, A:%d, H:%d, U:%d",GaugeID,Levels[Slot],Offset,Readings,(int)(ScaleFactor*Readings*1000),TriggerLevel,AlertLevel,Heartbeat,UpdateInterval);
+			sprintf(msg,"G:%d, L:%d, O:%d, R:%d, F:%d, T:%d, H:%d, U:%d",GaugeID,Levels[Slot],Offset,Readings,(int)(ScaleFactor*Readings*1000),TriggerLevel,Heartbeat,UpdateInterval);
 			lcd.print(msg);
 			SendSMS(Sender,msg);
 		}
@@ -213,23 +204,6 @@ void HandleSMScmd()
 			SendSMS(Sender,msg);
 		}
 
-		else if (SMScmd[5] >= '0' && SMScmd[5] <= ('0'+NumVIPs))
-		{
-			v = SMScmd[5]-'0';
-			strcpy(SMScmd, (SMScmd+7));
-			
-			for (n=0; n<VIPlength; n++)
-			{
-				Ch = SMScmd[n];
-				if (Ch==' ')
-					Ch = 0;
-				eeprom_write_byte((uint8_t*)(E_VIPS + (v)*VIPlength + n), Ch);
-			}
-			sprintf(msg,"VIP %d %s", v, SMScmd);
-			lcd.print(msg);
-			SendSMS(Sender,msg);
-		}
-		
 		else
 		SendSMS(Sender,"Que?");
 		
@@ -261,7 +235,7 @@ void DelSMS(int Sindex)
 	else
 	lcd.print(F("->bad"));
 	delay(500);
-} */
+} 
 
 void SendSMS(char* Num, char* SMSmsg)
 {

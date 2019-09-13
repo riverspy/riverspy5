@@ -20,7 +20,7 @@
 #define SERIAL_BAUD 19200
 #define SERIAL_TIMEOUT 2500
 #define LEVELARRAY 96					// store up to 96 readings between web updates, equivalent of 24 hours at 15min intervals
-#define LOW_POWER_mV 3800				// go into low power mode, updating every 3 hours if voltage is below 3.900V
+#define LOW_POWER_mV 3900				// go into low power mode, updating every 3 hours if voltage is below 3.900V
 
 #define UPDATE_URL "http://www.riverspy.net/updaterz.cgi"
 #define DEBUGLOG_URL "http://www.riverspy.net/debuglog.cgi"
@@ -31,23 +31,22 @@
 
 #define SIM_PIN				"0000"		// PIN code of the GSM SIM card
 #define Default_Contrast	60			// was 127
-#define Default_Heartbeat	300			// default is 900 seconds = 15 minutes
+#define Default_Heartbeat	900			// default is 900 seconds = 15 minutes
 #define Default_Readings	10
 #define Default_Offset		400			// River Level = Offset - (Vertical distance measured by LIDAR) (default 600cm)
 #define Default_Scale		1000		// 1000 for vertical LIDAR, 1000.Cos(Theta) if at an angle
 #define Default_GaugeID		10			// 3 for River Styx test setup, 10 for Rein da Medel
 #define Default_Pass		1234		// crude security feature to deter malicious web updates
-#define Default_Trigger		100			// Send web updates every reading when the level is above trigger (default 100cm)
-#define Default_Alert		2000		// this will alert up to 10 VIPs by SMS when the river exceeds this level
-#define Default_UpInt		1			// send updates to web every nth reading unless river level above trigger
-#define Default_DebugLevel	0			// 0001 => just the startup admin sms 
+#define Default_Trigger		200			// Send web updates every reading when the level is above trigger (default 100cm)
+#define Default_UpInt		12			// send updates to web every nth reading unless river level above trigger
+#define Default_DebugLevel	16			// 10000 => log extra data
 #define DebugBit_SMS		0			// Bit 0 => send Admin SMS at boot time
 #define DebugBit_CP			1			// Bit 1 => track checkpoint in EEPROM - caution EEPROM can burn out after 100,000 writes
 #define DebugBit_24hrON		2			// Bit 2 => leave the phone on - only use if powered from mains
 #define DebugBit_freeRAM	3			// Bit 3 => log the free RAM instead of water level if checking for a memory leak
+#define DebugBit_log		4			// Bit 4 => send an extra http logging debug data
 #define VBAT_SCALE			18		// scale 1024 to 18.3V
-#define NumVIPs				10
-#define VIPlength			14
+#define PhoneNoLength		14
 
 // this is the memory map for where variables are stored in EEPROM
 #define E_PASSCODE 0			// 2 bytes (int) for passcode
@@ -71,11 +70,10 @@
 #define E_VIPS 94					// 10x14 = 140 bytes for those that receive sms alerts
 #define E_READS 234				// 2 bytes  for readings
 #define E_UPINT 236				// 2 bytes  for update interval (1 to 96)
-#define E_ALERTLEVEL 238		// 2 bytes (int) for alert level
-#define E_CHECKPOINT 240		// 2 bytes (int) for checkpoint
+#define E_CHECKPOINT 238		// 2 bytes (int) for checkpoint
 // CheckPoint holds the latest point that called a watchdog timeout to track where the timeout occurred
 // Make sure not to modify CheckPoint until the administrator sms message has been sent after the new boot
-#define E_DEBUGLEVEL 242		// 2 bytes (int) Bit 0=>send admin sms at boot time, Bit 1=>track CheckPoints
+#define E_DEBUGLEVEL 240		// 2 bytes (int) Bit 0=>send admin sms at boot time, Bit 1=>track CheckPoints
 
 #define myCID 1
 
