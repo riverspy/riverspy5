@@ -48,7 +48,7 @@ void setup(){
 
 	lcd.begin(84, 48, CHIP_ST7576);
 	lcd.print(F("-RIVERSPY.NET-"));
-	lcd.print(F("    v5.03     "));
+	lcd.print(F("    v5.04     "));
 	lcd.print(F("     by       "));
 	lcd.print(F(" Daithi Power "));
 	lcd.print(F("   Sept 2019  "));
@@ -470,7 +470,14 @@ void loop()
 
 				lcd.print(F("Phone is Ready"));
 				wdt_reset();
-				delay(3000);
+				delay(500);
+				RSSI = ReadRSSI();		// read and display the signal strength
+				lcd.setCursor(0,2);
+				lcd.clearLine();	
+				lcd.print(F("RSSI: "));
+				lcd.print(RSSI);
+				delay(2000);
+				
 				wdt_reset();
 				TrackCP(CP_PIN_IS_GOOD);
 				LeavePhoneOn = (NewSMScmd() != -1);		// if we get an sms cmd, process it and then leave the modem on for the next cycle
@@ -655,7 +662,7 @@ int SendLevelUpdate()
 				lcd.print((int)(TrySlot));
 				lcd.print('>');
 
-				sprintf(msg,"%s?river=%05d&pass=%04d&time=%ld&level=%d&mvolts=%d&temp=%d&vr=%d", UPDATE_URL, GaugeID, PassCode, SlotTime, Levels[TrySlot], mV, Temperature, validReads);
+				sprintf(msg,"%s?river=%05d&pass=%04d&time=%ld&level=%d&mvolts=%d&temp=%d&vr=%d&rssi=%d", UPDATE_URL, GaugeID, PassCode, SlotTime, Levels[TrySlot], mV, Temperature, validReads, RSSI);
 				ret = getHTTPbody(msg, UPDATE_SERVER, msg, 50, 3);		// 4 characters should be enough to hold level but read em all
 				wdt_reset();
 
