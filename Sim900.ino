@@ -359,5 +359,16 @@ int ReadVoltage()
 	}	
 	else
 		return(0);	
-	
+}
+
+int ReadRSSI()
+{
+	Serial.println(F("AT+CSQ"));		// check RSSI signal strength
+	if (Serial.find("+CSQ:"))
+	{
+		msg[Serial.readBytesUntil('\r', msg, MSG_LEN)]=0;	// read the RSSI
+		return(atoi(msg));
+	}
+	else
+	return(0);
 }
