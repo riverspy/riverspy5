@@ -428,10 +428,13 @@ void loop()
 
 	UpdateScreenData(Levels[Slot], LastLevel(Slot));
 	TrackCP(CP_TURN_ON_PHONE);
-
+	LeavePhoneOn = false;		// the default is to turn off the phone between readings
+	
 	if(PhoneOK = !PhoneOn())
 	{
 		turnOnDelay = now() - turnOnDelay;			// update the time from the real time clock on the SIM900
+		wdt_reset();
+		delay(1000);
 		wdt_reset();
 		TrackCP(CP_PHONE_IS_ON);
 		if (GetRealTime(GaugeID) > 0)
