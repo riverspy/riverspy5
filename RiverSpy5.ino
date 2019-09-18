@@ -34,8 +34,6 @@ float ScaleFactor, timeFactor;
 
 uint8_t PhoneOK=0, GprsOn=0, TCPopen=0;
 
-// A custom glyph (a smiley)...
-static const byte glyph[] = { B00010000, B00110100, B00110000, B00110100, B00010000 };
 // static PCD8544 lcd(13,11,8,9,12);   // SCLK:D13, SDIN:D11, D/C:D8, RST:D9, SCE: D12 GBoard900
 static PCD8544 lcd(13,11,12,11,8);   // SCLK:D13, SDIN:D11, D/C:D12, RST:RST, SCE: D8
 
@@ -76,7 +74,7 @@ void setup(){
 	digitalWrite(PRESSBACK, HIGH);		// turn on the pull ups
 	digitalWrite(PRESSENTER, HIGH);		// turn on the pull ups
 
-	digitalWrite(GSM_ON,HIGH);			// cycle the power on pin
+	digitalWrite(GSM_ON,HIGH);		// cycle the power on pin
 	delay (1500);
 	digitalWrite(GSM_ON,LOW);
 	wdt_reset();  // watchdog reset
@@ -117,7 +115,7 @@ void setup(){
 	lcd.setCursor(0,4);
 	lcd.print(F("Scale: "));
 	lcd.print(Scale1000);
-	lcd.setCursor(0,5);			// show
+	lcd.setCursor(0,5);			
 	lcd.print(F("Tr:"));
 	lcd.print(TriggerLevel);
 
