@@ -50,7 +50,7 @@ void enterSleep(void)	// Enters the arduino into sleep mode.
 
 void wdt_setup_1s_with_reset()
 {
-		/*** Setup the WDT ***/
+	/*** Setup the WDT ***/
   
   /* Clear the reset flag. */
   MCUSR &= ~(1<<WDRF);

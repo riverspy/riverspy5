@@ -4,7 +4,7 @@ int NewSMScmd()
 	int SMSno;
 	TrackCP(CP_CHECK_SMS);
 	SMSno = CheckForSMS();			// test for sms received
-	delay(500);										// so that you can see the message on the screen
+	delay(500);				// so that you can see the message on the screen
 	
 	if (SMSno != -1)
 	{
@@ -34,7 +34,7 @@ int CheckForSMS()
 	lcd.clearLine();
 	lcd.print(F("Check SMS "));
 	emptyRXbuffer();
-	Serial.println(F("AT+CMGL=\"REC UNREAD\""));						// read messages
+	Serial.println(F("AT+CMGL=\"REC UNREAD\""));		// read messages
 
 	if (Serial.findUntil("+CMGL:", OKstr))		// read until just before the index number
 	{
@@ -46,7 +46,7 @@ int CheckForSMS()
 		{
 			Sender[Serial.readBytesUntil('"', Sender, 13)]=0;
 			Serial.find(CRLF);					// skip to past the CR-LF
-			SMScmd[Serial.readBytesUntil(0x0D,SMScmd, MAX_CMD_LEN-1)] = 0;					// read the text portion
+			SMScmd[Serial.readBytesUntil(0x0D,SMScmd, MAX_CMD_LEN-1)] = 0;		// read the text portion
 
 			Serial.find(OKstr);
 			
