@@ -12,7 +12,7 @@
 #include <SoftwareSerial.h>
 
 
-int mV=12000, PassCode, Temperature, ret, validReads;
+int mV=12000, PassCode, Temperature, ret, validReads, RSSI;
 char n,v;
 int Levels[LEVELARRAY];
 char LatestUpdateSlot, Slot, StartMonth;
