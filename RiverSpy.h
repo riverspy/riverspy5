@@ -41,35 +41,35 @@
 #define Default_UpInt		12			// send updates to web every nth reading unless river level above trigger
 #define Default_DebugLevel	16			// 10000 => log extra data
 #define DebugBit_SMS		0			// Bit 0 => send Admin SMS at boot time
-#define DebugBit_CP			1			// Bit 1 => track checkpoint in EEPROM - caution EEPROM can burn out after 100,000 writes
+#define DebugBit_CP		1			// Bit 1 => track checkpoint in EEPROM - caution EEPROM can burn out after 100,000 writes
 #define DebugBit_24hrON		2			// Bit 2 => leave the phone on - only use if powered from mains
 #define DebugBit_freeRAM	3			// Bit 3 => log the free RAM instead of water level if checking for a memory leak
 #define DebugBit_log		4			// Bit 4 => send an extra http logging debug data
-#define VBAT_SCALE			18		// scale 1024 to 18.3V
+#define VBAT_SCALE		18			// scale 1024 to 18.3V
 #define PhoneNoLength		14
 
 // this is the memory map for where variables are stored in EEPROM
 #define E_PASSCODE 0			// 2 bytes (int) for passcode
 #define E_HEARTBEAT 2			// 2 bytes (int) for heartbeat
-#define E_OFFSET 4				// 2 bytes  for offset
+#define E_OFFSET 4			// 2 bytes  for offset
 #define E_SCALE1000 6			// 2 bytes for scale factor, (ADC * E_SCALE1000 / 1000 = level in cm)
-								// 4V x (33k / (33k+15k)) = 2.75V at ADC input
-								// 500cm is 4V at sensor, is 2.75V at ADC input , is 853 at ADC output
-								// nominal value for ESCALE1000 is 586
+					// 4V x (33k / (33k+15k)) = 2.75V at ADC input
+					// 500cm is 4V at sensor, is 2.75V at ADC input , is 853 at ADC output
+					// nominal value for ESCALE1000 is 586
 #define E_PROXYPORT 8			// 2 bytes (int) for proxy port
 #define E_APN 10
 #define E_APN_LEN 30			// 30 bytes for APN
 #define E_APN_USER 40
-#define E_APN_USER_LEN 15			// 15 bytes for APN username
+#define E_APN_USER_LEN 15		// 15 bytes for APN username
 #define E_APN_PASS 55
-#define E_APN_PASS_LEN 15			// 15 bytes for APN password
+#define E_APN_PASS_LEN 15		// 15 bytes for APN password
 #define E_SERVER 70
 #define E_SERVER_LEN 20			// 20 bytes for server name or IP address
 #define E_GAUGE_ID 90			// 2 bytes (int) for Gauge ID
-#define E_TRIGGERLEVEL 92			// 2 bytes (int) for trigger level
+#define E_TRIGGERLEVEL 92		// 2 bytes (int) for trigger level
 #define E_VIPS 94					// 10x14 = 140 bytes for those that receive sms alerts
-#define E_READS 234				// 2 bytes  for readings
-#define E_UPINT 236				// 2 bytes  for update interval (1 to 96)
+#define E_READS 234			// 2 bytes  for readings
+#define E_UPINT 236			// 2 bytes  for update interval (1 to 96)
 #define E_CHECKPOINT 238		// 2 bytes (int) for checkpoint
 // CheckPoint holds the latest point that called a watchdog timeout to track where the timeout occurred
 // Make sure not to modify CheckPoint until the administrator sms message has been sent after the new boot
@@ -108,20 +108,20 @@
 // list of checkpoints useful for finding out where code has timed out, causing the watchdog to reboot the system
 #define CP_OFF			0
 #define CP_1S_LOOP		100
-#define CP_SET_TO_8S	200
+#define CP_SET_TO_8S		200
 #define CP_TURN_ON_PHONE	250
-#define CP_PHONE_IS_ON	300
-#define CP_PIN_IS_NEXT	400
-#define CP_PIN_IS_GOOD	500
-#define CP_SEND_TO_VIP	600
+#define CP_PHONE_IS_ON		300
+#define CP_PIN_IS_NEXT		400
+#define CP_PIN_IS_GOOD		500
+#define CP_SEND_TO_VIP		600
 #define CP_MONTHLY_REBOOT	700
-#define CP_BATT_REBOOT	800
-#define CP_SEND_UPDATE	900
-#define CP_UPDATE_GPRS	1000
-#define CP_UPDATE_TCP	1100
+#define CP_BATT_REBOOT		800
+#define CP_SEND_UPDATE		900
+#define CP_UPDATE_GPRS		1000
+#define CP_UPDATE_TCP		1100
 #define CP_TCP_OPEN		1150
-#define CP_CHECK_SMS	1200
-#define CP_DELETE_SMS	1300
-#define CP_HANDLE_SMS	1400
+#define CP_CHECK_SMS		1200
+#define CP_DELETE_SMS		1300
+#define CP_HANDLE_SMS		1400
 #define CP_CONFIG_REBOOT	1500
 #define CP_READING_LEVEL	1600
