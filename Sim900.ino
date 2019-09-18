@@ -98,7 +98,7 @@ int wait_for_reg(char* PIN){
 	{
 		wdt_reset();
 		// Send AT+CREG every three seconds and wait for the registration
-		Serial.println(F("AT+CREG?"));					// wait for response of 0,1
+		Serial.println(F("AT+CREG?"));			// wait for response of 0,1
 		if (Serial.find("+CREG: 0,"))
 		{
 			delay(10);				// wait for the next char to arrive
@@ -127,7 +127,7 @@ int sim900_off()
 	Serial.print((char)(0x1A));		// send a ctrl-z in case it is not expecting AT commands
 	Serial.println(F("\r\n\r\n"));		// make sure that its listening
 	Serial.println(F("AT+CPOWD=1"));	// send the power down command
-	Serial.flush();					// let all of the chars go out in case a sleep follows the return
+	Serial.flush();				// let all of the chars go out in case a sleep follows the return
 	return 0;
 }
 
