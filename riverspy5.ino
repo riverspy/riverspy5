@@ -702,6 +702,7 @@ int SendLevelUpdate()
 							delay(500);
 							wdt_reset();
 							GetRealTime(GaugeID);
+							StartMonth = month();	// otherwise it will do a "monthly" reboot
 						}
 								
 						// send extra debug info here
