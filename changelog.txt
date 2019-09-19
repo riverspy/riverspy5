@@ -12,3 +12,6 @@ v5.03 13/09/2019
 
 v5.04 16/09/2019
 1. Added logging of GSM signal strength (RSSI)
+
+v5.05 19/09/2019
+1. If the system does not successfully read the current time from the server at boot time, it will now update it on the next regular update

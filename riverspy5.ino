@@ -46,7 +46,7 @@ void setup(){
 
 	lcd.begin(84, 48, CHIP_ST7576);
 	lcd.print(F("-RIVERSPY.NET-"));
-	lcd.print(F("    v5.04     "));
+	lcd.print(F("    v5.05     "));
 	lcd.print(F("     by       "));
 	lcd.print(F(" Daithi Power "));
 	lcd.print(F("   Sept 2019  "));
@@ -693,6 +693,17 @@ int SendLevelUpdate()
 					}
 					else
 					{
+						// update the time from the server if necessary here
+						if (year() < 2015)
+						{
+							wdt_reset();
+							delay(500);
+							ReadServerTime();
+							delay(500);
+							wdt_reset();
+							GetRealTime(GaugeID);
+						}
+								
 						// send extra debug info here
 						wdt_reset();
 						if (bitRead(DebugLevel, DebugBit_log))
@@ -716,21 +727,6 @@ int SendLevelUpdate()
 				closeGPRS();
 				GprsOn = 0;
 				Tries--;
-			}
-		}
-
-
-		if ((year() < 2015) && GprsOn)
-		{
-			wdt_reset();
-			delay(500);
-			if (!openTCPproxy(msg))
-			{
-				ReadServerTime();
-				closeTCP();
-				delay(500);
-				wdt_reset();
-				GetRealTime(GaugeID);
 			}
 		}
 
