@@ -15,7 +15,7 @@
 #define GSM_ON 6
 #define GSM_RESET 7
 
-#define MSG_LEN 130
+#define MSG_LEN 100
 #define MAX_CMD_LEN 25
 #define SERIAL_BAUD 19200
 #define SERIAL_TIMEOUT 2500
