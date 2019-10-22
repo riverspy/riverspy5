@@ -15,3 +15,7 @@ v5.04 16/09/2019
 
 v5.05 19/09/2019
 1. If the system does not successfully read the current time from the server at boot time, it will now update it on the next regular update
+
+v5.06 22/10/2019
+1. Added range checking to ignore LIDAR readings above 500cm as well as readings below 30cm
+

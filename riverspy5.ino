@@ -46,7 +46,7 @@ void setup(){
 
 	lcd.begin(84, 48, CHIP_ST7576);
 	lcd.print(F("-RIVERSPY.NET-"));
-	lcd.print(F("    v5.05     "));
+	lcd.print(F("    v5.06     "));
 	lcd.print(F("     by       "));
 	lcd.print(F(" Daithi Power "));
 	lcd.print(F("   Sept 2019  "));
@@ -376,7 +376,7 @@ void loop()
 	while((millis()-readingStart) < (Readings*1000))// keep reading continuously for Readings seconds
 	{
 		dist = tfmini.getDistance();
-		if (dist>=30)							// ignore any returns less than 30cm
+		if (dist>=30 && dist<=500)							// ignore any returns less than 30cm or greater than 500cm
 		{
 			Total = Total + dist;
 			validReads++;
